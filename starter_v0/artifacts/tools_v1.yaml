@@ -1,0 +1,143 @@
+# starter_v0 - tool declarations.
+# If you rename a tool, keep the name in sync across:
+#   this file -> tools/__init__.py (TOOL_FUNCTIONS) -> data/eval_base.json + data/eval_research_extension.json
+tools:
+  # ---------------- Core tools ----------------
+  - name: clarify
+    description: >
+      Ask the user for missing required information or confirmation. Use this
+      when a required URL, account/handle, target topic, or send confirmation is
+      missing. Use response_type="text" for missing information and
+      response_type="yes_no" for confirmation before write/send actions.
+    parameters:
+      type: object
+      properties:
+        question: {type: string, default: "", description: "Question to ask the user"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Expected response type"}
+        options: {type: array, default: [], items: {type: string}, description: "Choices when response_type is choice"}
+      required: []
+
+  - name: timeline
+    description: >
+      Get recent tweets/posts from a specific account. Use this only when the
+      user provides a concrete handle/screenname or a well-known public figure
+      that can be safely mapped to a known handle. If the user asks for tweets
+      but does not specify whose tweets, use clarify with
+      response_type="text". Never guess the account.
+    parameters:
+      type: object
+      properties:
+        screenname: {type: string, default: "", description: "Concrete account handle/screenname"}
+        limit: {type: integer, default: 5, description: "Number of posts"}
+      required: [screenname]
+
+  - name: social_search
+    description: >
+      Search social media for tweets/posts about a topic. Use this when the
+      user asks what people are saying about a subject on Twitter/X or asks to
+      find tweets/posts about a topic.
+    parameters:
+      type: object
+      properties:
+        query: {type: string, default: "", description: "Core topic or keyword"}
+        search_type: {type: string, enum: [Latest, Top], default: "Latest", description: "Sort mode"}
+        limit: {type: integer, default: 5, description: "Number of results"}
+      required: [query]
+
+  - name: lookup
+    description: >
+      Search the web for general information or news. Use topic="news" for news
+      requests. Use timeframe="day" for today/hom nay and timeframe="week" for
+      this week/tuan nay. Keep query focused on the core subject only, e.g.
+      query="AI" rather than query="AI news" when topic="news" can represent
+      news intent.
+    parameters:
+      type: object
+      properties:
+        query: {type: string, default: "", description: "Core subject to search for; do not include news/time words when structured fields cover them"}
+        topic: {type: string, enum: [general, news], default: "general", description: "Use news for news requests"}
+        timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Use day for today/hom nay; week for this week/tuan nay"}
+        max_results: {type: integer, default: 5, description: "Number of results"}
+      required: [query]
+
+  - name: fetch
+    description: >
+      Read or summarize a concrete URL. Use this only when an explicit URL is
+      available in the current conversation or previous turns. Do not invent
+      URLs. If the user says "this article", "bai nay", "bai viet nay",
+      "link nay", or similar without giving a URL, use clarify with
+      response_type="text".
+    parameters:
+      type: object
+      properties:
+        url: {type: string, default: "", description: "Explicit concrete URL from the conversation"}
+      required: [url]
+
+  - name: format
+    description: >
+      Format already available data into a requested written structure. Use
+      this only when the source items already exist from the conversation or
+      previous tool results.
+    parameters:
+      type: object
+      properties:
+        items:
+          type: array
+          default: []
+          description: "Items to format"
+          items:
+            type: object
+            properties:
+              title: {type: string}
+              url: {type: string}
+              source: {type: string}
+              summary: {type: string}
+              section: {type: string}
+        template: {type: string, enum: [brief, sections, bullets, thread, daily_ai_vn], default: "sections", description: "Output template"}
+        headline: {type: string, default: "", description: "Headline"}
+      required: [items, template]
+
+  # ---------------- Bonus tools ----------------
+  - name: send
+    description: >
+      Send the final confirmed text to Telegram. This is a write/action tool.
+      Only use this tool after the user explicitly confirms the exact final text
+      to send. Do not use this tool to answer normal questions, solve math,
+      write code, summarize content, or draft text. If confirmation is missing,
+      use clarify with response_type="yes_no".
+    parameters:
+      type: object
+      properties:
+        text: {type: string, default: "", description: "Final confirmed text to send"}
+        confirmed: {type: boolean, default: false, description: "True only after explicit user confirmation"}
+      required: [text]
+
+  - name: policy
+    description: "Search internal policy documents."
+    parameters:
+      type: object
+      properties:
+        query: {type: string, default: "", description: "Query"}
+        policy_area: {type: string, enum: [all, ai_research, source_citation, data_privacy, external_publishing, tool_usage], default: "all", description: "Policy area"}
+        top_k: {type: integer, default: 3, description: "Number of entries"}
+      required: [query]
+
+  - name: papers
+    description: "Search for academic papers."
+    parameters:
+      type: object
+      properties:
+        query: {type: string, default: "", description: "Search query"}
+        max_results: {type: integer, default: 5, description: "Number of results"}
+        sort_by: {type: string, enum: [relevance, lastUpdatedDate, submittedDate], default: "relevance", description: "Sort order"}
+      required: [query]
+
+  - name: paper_text
+    description: "Get text content from a concrete paper ID or URL."
+    parameters:
+      type: object
+      properties:
+        arxiv_url: {type: string, default: "", description: "arXiv ID or URL"}
+        max_pages: {type: integer, default: 5, description: "Number of pages"}
+        max_chars: {type: integer, default: 8000, description: "Maximum characters"}
+      required: [arxiv_url]

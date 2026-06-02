@@ -72,9 +72,16 @@ async def get_index(request: Request):
 async def post_chat(payload: ChatRequest):
     try:
         # Load system prompt and tools based on the selected version
-        system_prompt_path = ARTIFACTS_DIR / "system_prompt.md"
-        tools_path = ARTIFACTS_DIR / "tools.yaml"
+        version = payload.version.lower()
+        system_prompt_path = ARTIFACTS_DIR / f"system_prompt_{version}.md"
+        tools_path = ARTIFACTS_DIR / f"tools_{version}.yaml"
         
+        # Fallback to default if version-specific files don't exist
+        if not system_prompt_path.exists():
+            system_prompt_path = ARTIFACTS_DIR / "system_prompt.md"
+        if not tools_path.exists():
+            tools_path = ARTIFACTS_DIR / "tools.yaml"
+            
         if not system_prompt_path.exists():
             raise HTTPException(status_code=500, detail="System prompt file not found")
         if not tools_path.exists():
