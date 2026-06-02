@@ -20,10 +20,9 @@ tools:
   - name: timeline
     description: >
       Get recent tweets/posts from a specific account. Use this only when the
-      user provides a concrete handle/screenname or a well-known public figure
-      that can be safely mapped to a known handle. If the user asks for tweets
-      but does not specify whose tweets, use clarify with
-      response_type="text". Never guess the account.
+      user provides a concrete handle/screenname. If the user asks for tweets
+      but does not specify whose tweets, YOU MUST use clarify with
+      response_type="text". CẤM đoán mò (never guess) the account.
     parameters:
       type: object
       properties:
@@ -64,8 +63,8 @@ tools:
     description: >
       Read or summarize a concrete URL. Use this only when an explicit URL is
       available in the current conversation or previous turns. Do not invent
-      URLs. If the user says "this article", "bai nay", "bai viet nay",
-      "link nay", or similar without giving a URL, use clarify with
+      URLs like example.com. If the user says "this article", "bai nay", "bai viet nay",
+      "link nay", or similar without explicitly giving a URL, YOU MUST use clarify with
       response_type="text".
     parameters:
       type: object
@@ -101,10 +100,10 @@ tools:
   - name: send
     description: >
       Send the final confirmed text to Telegram. This is a write/action tool.
-      Only use this tool after the user explicitly confirms the exact final text
+      CRITICAL: Only use this tool after the user explicitly confirms the exact final text
       to send. Do not use this tool to answer normal questions, solve math,
       write code, summarize content, or draft text. If confirmation is missing,
-      use clarify with response_type="yes_no".
+      YOU MUST use clarify with response_type="yes_no".
     parameters:
       type: object
       properties:
